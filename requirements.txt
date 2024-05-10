@@ -1,0 +1,4 @@
+flask-wtf
+flask==2.2.5
+flask-wtf
+gunicorn
