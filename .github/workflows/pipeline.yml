@@ -1,8 +1,7 @@
 - name: Install Requirements
   run:  pip install flask flask-wtf
 
-name: DevOpsLab Pipeline
-
+name: DevOpsLab Pipeline  # Este é o nome do workflow
 # Evento que irá acionar a pipeline
 on:
   push:
