@@ -18,4 +18,4 @@ COPY --chown=root:root --chmod=644 app.py requirements.txt /home/myapp/
 RUN pip install --user --trusted-host pypi.python.org -r requirements.txt
 
 # Garante que será iniciado a aplicação.
-CMD ["gunicorn", "app:app"]
+CMD ["gunicorn", "app:app"] 
