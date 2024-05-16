@@ -23,13 +23,10 @@ jobs:
           python-version: '3.10'
 
       - name: Install Requirements
-        run:  pip install flask flask-wtf pytest pytest-cov
+        run:  pip install flask
 
       - name: Unit Test
-        run: |
-          coverage run --source=app -m pytest test.py
-          coverage report -m
-          coverage xml -i
+        run: python -m unittest -v test
 
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master  #https://github.com/marketplace/actions/sonarcloud-scan
@@ -76,23 +73,19 @@ jobs:
       - name: Validando a API
         run: 'curl "${{ steps.deploy.outputs.url }}"'
 
-      - name: Notificação Slack
-        id: slack
-        uses: slackapi/slack-github-action@v1.25.0
+  DAST:
+    needs: Deploy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+
+    steps:
+      - name: Download do Repositório
+        uses: actions/checkout@v4       # https://github.com/actions/checkout
+    
+      - name: DAST (ZAP Scan)
+        uses: zaproxy/action-full-scan@v0.10.0   #https://github.com/marketplace/actions/zap-full-scan
         with:
-          payload: |
-            {
-              "text": "DevOpsLab Pipeline : ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "DevOpsLab Pipeline: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
-                  }
-                }
-              ]
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_NOTIFICATIONS_TOKEN }}
-          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+          target: 'https://gabydias-nu2ly27wnq-ue.a.run.app/'
