@@ -23,10 +23,13 @@ jobs:
           python-version: '3.10'
 
       - name: Install Requirements
-        run:  pip install flask
+        run: pip install flask flask-wtf pytest pytest-cov
 
       - name: Unit Test
-        run: python -m unittest -v test
+        run: |
+          coverage run --source=app -m pytest test.py
+          coverage report -m
+          coverage xml -i
 
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master  #https://github.com/marketplace/actions/sonarcloud-scan
@@ -67,7 +70,7 @@ jobs:
         with:
           service: ${{ vars.GOOGLE_MYAPP }}
           region: ${{ vars.GOOGLE_REGION }}
-          image:   ${{ vars.GOOGLE_ARTIFACT }}/${{ vars.GOOGLE_PROJECT_ID }}/${{ vars.GOOGLE_REPONAME }}/${{ vars.GOOGLE_MYAPP }}:latest
+          image: ${{ vars.GOOGLE_ARTIFACT }}/${{ vars.GOOGLE_PROJECT_ID }}/${{ vars.GOOGLE_REPONAME }}/${{ vars.GOOGLE_MYAPP }}:latest
           flags: '--allow-unauthenticated'
 
       - name: Validando a API
@@ -89,3 +92,24 @@ jobs:
         uses: zaproxy/action-full-scan@v0.10.0   #https://github.com/marketplace/actions/zap-full-scan
         with:
           target: 'https://marydias-nu2ly27wnq-ue.a.run.app/'
+
+      - name: Notificação Slack
+        id: slack
+        uses: slackapi/slack-github-action@v1.25.0
+        with:
+          payload: |
+            {
+              "text": "DevOpsLab Pipeline : ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "DevOpsLab Pipeline: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_NOTIFICATIONS_TOKEN }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
