@@ -88,4 +88,4 @@ jobs:
       - name: DAST (ZAP Scan)
         uses: zaproxy/action-full-scan@v0.10.0   #https://github.com/marketplace/actions/zap-full-scan
         with:
-          target: 'https://gabydias-nu2ly27wnq-ue.a.run.app/'
+          target: 'https://marydias-nu2ly27wnq-ue.a.run.app/'
